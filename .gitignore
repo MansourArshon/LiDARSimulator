@@ -1,0 +1,36 @@
+# Visual Studio
+.vs/
+*.vcxproj.user
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build outputs
+Debug/
+Release/
+x64/
+bin/
+obj/
+out/
+
+# Logs and caches
+*.log
+*.tlog
+*.ipch
+*.pdb
+*.opendb
+*.idb
+*.ilk
+
+# Temporary files
+*.tmp
+*.cache
+*.pyc
+*.DS_Store
+Thumbs.db
+
+# Data files (optional)
+data/*.tif
+data/*.las
+data/*.csv
