@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <Catch2Adapter>
+    <!-- Regex to match your test executables -->
+    <FilenameFilter>.*Tests\.exe$</FilenameFilter>
+    <!-- Path to look for test executables -->
+    <Path>$(SolutionDir)\x64\Debug</Path>
+    <!-- Optional, relative working directory for tests -->
+    <WorkingDirectoryRoot>Solution</WorkingDirectoryRoot>
+  </Catch2Adapter>
+</RunSettings>
