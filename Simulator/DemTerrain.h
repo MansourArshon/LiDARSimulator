@@ -1,5 +1,19 @@
 #pragma once
+#include <string>
+#include <vector>
+#include <fstream>
+
 class DemTerrain
 {
-};
+public:
+	DemTerrain(const std::string& filepath, int size);
+	double getElevationAt(int row, int col) const;
+	int getWidth() const { return width_; };
+	int getHeight() const { return height_; };
 
+
+private:
+	int width_;
+	int height_;
+	std::vector<double> elevationData_;
+};
