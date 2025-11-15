@@ -4,43 +4,59 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include "../Simulator/DemTerrain.h"
 #include "Shader.h"
+#include "SrtmView.h"
+#include "imgui/imgui.h"
+#include "imgui/backends/imgui_impl_glfw.h"
+#include "imgui/backends/imgui_impl_opengl3.h"
 
-int main() {
-    const std::string filepath = "C:\\Dev\\LidarSimulator\\SRTM\\N33W118.hgt";
-    const int size = 3601;
+static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    glViewport(0, 0, width, height);
+}
 
-    DemTerrain dem(filepath, size);
+SrtmView::SrtmView(const std::string filepath, const int size)
+	: filepath(filepath), size(size) {
+}
 
+int SrtmView::showSrtmData(const std::vector<float>& vertices)
+{
     // --------------------- GLFW INIT -------------------------
-    if (!glfwInit()) {
-        std::cerr << "Failed to initialize GLFW\n";
+
+    GLFWwindow* window = initGlfWindow();
+    if (!window) {
+        std::cerr << "Failed to create GLFW window\n";
         return -1;
     }
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "DEM Point Cloud", nullptr, nullptr);
-    if (!window) {
+    // --------------------- GLAD INIT -------------------------
+    bool retFlag;
+    int retVal = initGlad(window, retFlag);
+    if (retFlag) return retVal;
+
+    // --------------------- ImGui INIT -------------------------
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+
+    // Setup Platform/Renderer bindings
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
+
+    // --------------------- Check VERTEX DATA -------------------------
+
+    if (vertices.empty() || vertices.size() % 3 != 0) {
+        std::cerr << "Invalid vertex data\n";
+        // cleanup window and terminate
+        glfwDestroyWindow(window);
         glfwTerminate();
         return -1;
     }
 
-    glfwMakeContextCurrent(window);
-    glfwSwapInterval(1);
-
-    // --------------------- GLAD INIT -------------------------
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        std::cerr << "Failed to initialize GLAD\n";
-        return -1;
-    }
-
-    glEnable(GL_PROGRAM_POINT_SIZE);
-    glPointSize(1.0f);
-
-    // --------------------- BUILD VERTEX DATA -------------------------
-
-    std::vector<float> vertices = dem.getAllPoints();
-    int vertexCount = vertices.size() / 6;
+    size_t vertexCount = vertices.size() / 3;
 
     // --------------------- CREATE VAO/VBO -------------------------
     GLuint VAO, VBO;
@@ -57,12 +73,8 @@ int main() {
         GL_STATIC_DRAW);
 
     // positions (layout = 0)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-
-    // colors (layout = 1)
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);
 
@@ -73,6 +85,7 @@ int main() {
     while (!glfwWindowShouldClose(window)) {
         glClearColor(0.1f, 0.3f, 0.6f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
 
         shader.use();
 
@@ -93,6 +106,62 @@ int main() {
     glDeleteBuffers(1, &VBO);
     glDeleteVertexArrays(1, &VAO);
 
+    if (window) {
+        glfwDestroyWindow(window);
+    }
     glfwTerminate();
     return 0;
+}
+
+int SrtmView::initGlad(GLFWwindow* window, bool& retFlag)
+{
+    if (!window) {
+        std::cerr << "initGlad called with null window\n";
+        retFlag = true;
+        return -1;
+    }
+
+    retFlag = true;
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        std::cerr << "Failed to initialize GLAD\n";
+        glfwTerminate();
+        return -1;
+    }
+
+    // now safe to call GL functions and register callbacks
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    glViewport(0, 0, width, height);
+    glfwSwapInterval(1);
+
+    glEnable(GL_DEPTH_TEST); // ensure depth buffer is meaningful
+    glEnable(GL_PROGRAM_POINT_SIZE);
+    glPointSize(2.0f);
+    retFlag = false;
+    return 0;
+}
+
+GLFWwindow* SrtmView::initGlfWindow()
+{
+
+    if (!glfwInit()) {
+        std::cerr << "Failed to initialize GLFW\n";
+        return nullptr;
+    }
+
+    // Request a modern OpenGL context — adjust version/profile as needed
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    GLFWwindow* window = glfwCreateWindow(800, 600, "DEM Point Cloud", nullptr, nullptr);
+    if (!window) {
+        glfwTerminate();
+        return nullptr;
+    }
+
+    glfwMakeContextCurrent(window);
+
+    return window;
 }

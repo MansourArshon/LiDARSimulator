@@ -123,14 +123,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="DemTerrain.cpp" />
+    <ClCompile Include="DemMaker.cpp" />
+    <ClCompile Include="SrtmReader.cpp" />
     <ClCompile Include="FlightPath.cpp" />
     <ClCompile Include="LidarSensor.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PointCloudWriter.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DemTerrain.h" />
+    <ClInclude Include="DemMaker.h" />
+    <ClInclude Include="SrtmReader.h" />
     <ClInclude Include="FlightPath.h" />
     <ClInclude Include="LidarSensor.h" />
     <ClInclude Include="PointCloudWriter.h" />

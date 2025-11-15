@@ -1,15 +1,14 @@
 #version 330 core
 
 layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aColor;
 
-out vec3 vColor;
+out float vHeight;
 
 uniform mat4 uProjection;
 uniform mat4 uModelView;
 
 void main()
 {
-    gl_Position = uProjection * uModelView * vec4(aPos, 1.0);
-    vColor = aColor;
+    gl_Position = uProjection * uModelView * vec4(aPos.x, aPos.y, 0.0, 1.0);
+    vHeight = aPos.z;      // pass REAL elevation
 }

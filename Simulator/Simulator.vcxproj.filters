@@ -24,10 +24,13 @@
     <ClCompile Include="LidarSensor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DemTerrain.cpp">
+    <ClCompile Include="SrtmReader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PointCloudWriter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DemMaker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -38,13 +41,16 @@
     <ClInclude Include="LidarSensor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DemTerrain.h">
+    <ClInclude Include="SrtmReader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PointCloudWriter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DemMaker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
