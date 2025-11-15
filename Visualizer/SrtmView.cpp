@@ -7,6 +7,10 @@
 #include "../Simulator/DemTerrain.h"
 #include "Shader.h"
 
+static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    glViewport(0, 0, width, height);
+}
+
 int main() {
     const std::string filepath = "C:\\Dev\\LidarSimulator\\SRTM\\N33W118.hgt";
     const int size = 3601;
@@ -26,14 +30,21 @@ int main() {
     }
 
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(1);
 
     // --------------------- GLAD INIT -------------------------
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cerr << "Failed to initialize GLAD\n";
+        glfwTerminate();
         return -1;
     }
+    // now safe to call GL functions and register callbacks
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    glViewport(0, 0, width, height);
+    glfwSwapInterval(1);
 
+    glEnable(GL_DEPTH_TEST); // ensure depth buffer is meaningful
     glEnable(GL_PROGRAM_POINT_SIZE);
     glPointSize(1.0f);
 
