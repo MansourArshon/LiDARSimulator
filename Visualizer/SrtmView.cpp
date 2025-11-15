@@ -6,15 +6,18 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "../Simulator/DemTerrain.h"
 #include "Shader.h"
+#include "SrtmView.h"
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
-int main() {
-    const std::string filepath = "C:\\Dev\\LidarSimulator\\SRTM\\N33W118.hgt";
-    const int size = 3601;
+SrtmView::SrtmView(const std::string filepath, const int size)
+	: filepath(filepath), size(size) {
+}
 
+int SrtmView::showSrtmData()
+{
     DemTerrain dem(filepath, size);
 
     // --------------------- GLFW INIT -------------------------
