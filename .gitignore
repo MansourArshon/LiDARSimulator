@@ -7,6 +7,7 @@
 *.sln.docstates
 
 # Build outputs
+libs/
 Debug/
 Release/
 x64/
