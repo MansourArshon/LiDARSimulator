@@ -16,6 +16,18 @@ static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
+static std::vector<float> pointsToFloatVector(const std::vector<Point>& pts)
+{
+    std::vector<float> out;
+    out.reserve(pts.size() * 3);
+    for (const auto& p : pts) {
+        out.push_back(p.x_);
+        out.push_back(p.y_);
+        out.push_back(p.z_);
+    }
+    return out; // RVO/move will avoid extra copy
+}
+
 // Constructor: stores the path/size parameters for the SRTM data/view.
 SrtmView::SrtmView(const std::string filepath, const int size)
 	: filepath(filepath), size(size) {
@@ -40,7 +52,7 @@ SrtmView::SrtmView(const std::string filepath, const int size)
     - Per-frame ImGui lifecycle (NewFrame/Render) must be executed every frame inside the render loop.
     - The example uses an orthographic projection and draws the vertex array as GL_POINTS.
 */
-int SrtmView::showSrtmData(const std::vector<float>& vertices)
+int SrtmView::showSrtmData()
 {
     // --------------------- GLFW INIT -------------------------
     // Create a window and OpenGL context
@@ -72,7 +84,7 @@ int SrtmView::showSrtmData(const std::vector<float>& vertices)
 
     // --------------------- Check VERTEX DATA -------------------------
     // Validate incoming vertex buffer: expect X,Y,Z triples.
-    if (vertices.empty() || vertices.size() % 3 != 0) {
+    if (srtmData_.empty() || srtmData_.size() % 3 != 0 || flightPath_.empty() || flightPath_.size() % 3 != 0) {
         std::cerr << "Invalid vertex data\n";
         // If invalid, perform ImGui + window cleanup before returning.
         ImGui_ImplOpenGL3_Shutdown();
@@ -84,7 +96,8 @@ int SrtmView::showSrtmData(const std::vector<float>& vertices)
     }
 
     // Number of points (each vertex = 3 floats)
-    size_t vertexCount = vertices.size() / 3;
+    size_t vertexCount = srtmData_.size() / 3;
+    size_t flightVertexCount = flightPath_.size() / 3;
 
     // --------------------- CREATE VAO/VBO -------------------------
     // Upload vertex data once to GPU (static).
@@ -96,8 +109,8 @@ int SrtmView::showSrtmData(const std::vector<float>& vertices)
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER,
-        vertices.size() * sizeof(float),
-        vertices.data(),
+        srtmData_.size() * sizeof(float),
+        srtmData_.data(),
         GL_STATIC_DRAW);
 
     // Vertex attribute: position at layout location 0 (vec3)
@@ -134,6 +147,7 @@ int SrtmView::showSrtmData(const std::vector<float>& vertices)
         glm::mat4 modelView = glm::mat4(1.0f);
         shader.setMat4("uProjection", projection);
         shader.setMat4("uModelView", modelView);
+
 
         glBindVertexArray(VAO);
         glDrawArrays(GL_POINTS, 0, vertexCount);
@@ -191,6 +205,20 @@ int SrtmView::showSrtmData(const std::vector<float>& vertices)
     }
     glfwTerminate();
     return 0;
+}
+
+void SrtmView::setFlightPath(const std::vector<Point>& flightPath)
+{
+    flightPath_ = pointsToFloatVector(flightPath);
+    for (const float& item : flightPath_)
+    {
+        srtmData_.push_back(item);
+    }
+}
+
+void SrtmView::setSrtmData(const std::vector<Point>& srtmData)
+{
+	srtmData_ = pointsToFloatVector(srtmData);
 }
 
 /*

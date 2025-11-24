@@ -2,13 +2,7 @@
 
 #include <cstddef>
 #include <vector>
-
-// Simple 3D point used by DEM routines.
-struct Point {
-	float x_, y_, z_;
-	Point() = default;
-	Point(float x, float y, float z) : x_(x), y_(y), z_(z) {}
-};
+#include "FlightPath.h" 
 
 // Convert a square grid of elevation samples (row-major) into normalized 3D points.
 // - 'elevations' must contain N*N samples (N = sqrt(elevations.size())).
